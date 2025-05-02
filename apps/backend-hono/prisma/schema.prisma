@@ -1,5 +1,6 @@
-// Prismaスキーマ定義ファイルです。
-// 公式ドキュメント: https://pris.ly/d/prisma-schema
+// Prisma schema file for the Hono backend application.
+// This file defines the data model and database connection for the Prisma ORM.
+// For more information on how to use Prisma, visit https://pris.ly/d/prisma-docs
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
@@ -12,4 +13,91 @@ generator client {
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
+}
+
+/** Tasks Status */
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+/** Tasks Priority */
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+/**
+ * User Model
+ */
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  name String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  tasks Task[]
+  workLogs WorkLog[]
+}
+
+/**
+ * Project Model
+ */
+model Project {
+  id String @id @default(uuid())
+  name String
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks Task[]
+}
+
+/**
+ * Task Model
+ */
+model Task {
+  id String @id @default(uuid())
+  title String
+  descriptioon String?
+  status TaskStatus @default(TODO)
+  priority TaskPriority?
+  deadline DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String?
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workLogs WorkLog[]
+
+  @@index([userId])
+  @@index([projectId])
+}
+
+/**
+ * Work Log Model
+ */
+model WorkLog {
+  id String @id @default(uuid())
+  startTime DateTime
+  endTime DateTime
+
+  taskId String
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([userId])
 }
