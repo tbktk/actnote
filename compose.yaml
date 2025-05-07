@@ -1,0 +1,42 @@
+services:
+  backend-laravel:
+    image: laravel:latest
+    container_name: backend-laravel
+    build:
+      context: .
+      dockerfile: ./docker/laravel.Dockerfile
+    ports:
+      - ${LARAVEL_PORT}:8000
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${MYSQL_DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - .:/var/www/html
+    networks:
+      - actnote-default
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:9.3
+    container_name: mysql
+    ports:
+      - ${MYSQL_PORT}:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DB_NAME}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - actnote-default
+
+volumes:
+  mysql-data:
+
+networks:
+  actnote-default:
+    driver: bridge
