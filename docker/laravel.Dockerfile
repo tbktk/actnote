@@ -1,35 +1,64 @@
-FROM php:8.3-fpm-bookworm
+#--------------------------------------------------------------------------------------------------
+# Stage 1: Builder - PHPの依存関係をインストールし、最適化を図る
+#--------------------------------------------------------------------------------------------------
+FROM php:8.3-fpm-bookworm AS builder
 
-# 必要なPHP拡張モジュールをインストール
+# 必要なシステムパッケージとPHP拡張機能をインストール
 RUN apt update && apt install -y \
+    default-libmysqlclient-dev \
     libzip-dev \
-    nginx \
+    git \
     unzip \
-    && docker-php-ext-install zip pdo pdo_mysql
+    && docker-php-ext-install pdo pdo_mysql mysqli zip \
+    && apt clean && rm -rf /var/lib/apt/lists/*
 
-# Composerのインストール
-COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
+# Composerをインストール
+COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
-# 作業用ディレクトリを設定
-WORKDIR /var/www/html
+# Laravelアプリケーションのルートディレクトリを作業ディレクトリに設定
+# ビルドコンテキスト（モノレポのルート）から見た相対パス
+WORKDIR /app/apps/backend-laravel
 
-# Laravelをコピー
-COPY ./apps/backend-laravel/ .
+# キャッシュを効率的に利用するためにまずはcomposerファイルをコピー
+COPY apps/backend-laravel/composer.json ./
 
-# Nginxの設定ファイルをコピー
-COPY ./conf/nginx.conf /etc/nginx/conf.d/default.conf
+# Laravelアプリケーションの残りのコードをすべてコピー
+COPY apps/backend-laravel/ ./
 
-# 権限の設定
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
-
-# Laravelの依存関係をインストール
+# Composer依存関係をインストール
+# ※本番環境向けに開発用依存関係を除外し、オートローダーを最適化
 RUN composer install --no-dev --optimize-autoloader
 
-# Laravelのキャッシュをクリア
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Laravel固有の最適化を実行
+RUN php artisan optimize && \
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
-# NginxとPHP-FPMを起動
-CMD service nginx start && php-fpm
+#--------------------------------------------------------------------------------------------------
+# Stage 2: Runner - PHP-FPMを含む本番イメージ
+#--------------------------------------------------------------------------------------------------
+FROM php:8.3-fpm-bookworm AS runner
+
+# ランタイムに必要なシステムパッケージとPHP拡張機能をインストール
+RUN apt update && apt install -y \
+    default-libmysqlclient-dev \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mysqli zip \
+    && apt clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/apps/backend-laravel
+
+# ビルダーステージよりビルドされたアプリケーションコードと依存関係をコピー
+COPY --from=builder /app/apps/backend-laravel/ ./
+
+# 権限の設定
+# ※PHP-FPMを実行するユーザー（通常はwww-data）に書き込み権限を付与
+RUN chown -R www-data:www-data storage bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache
+
+# PHP-FPMがリッスンするポートを公開
+EXPOSE 9000
+
+# コンテナ起動時にPHP-FPMをフォアグラウンドで実行するコマンド
+CMD ["php-fpm"]

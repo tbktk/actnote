@@ -1,42 +1,94 @@
 services:
-  backend-laravel:
-    image: laravel:latest
-    container_name: backend-laravel
+
+  # frontend_builder:
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/react.Dockerfile
+  #   networks:
+  #     - actnote_default
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx.Dockerfile
+      args:
+        FRONTEND_BUILDER_IMAGE: frontend_builder
+    ports:
+      - ${NGINX_PORT}:80
+    depends_on:
+      - hono_backend
+      - laravel_backend
+    networks:
+      - actnote_default
+
+  hono_backend:
+    # container_name: hono_backend
+    build:
+      context: .
+      dockerfile: ./docker/hono.Dockerfile
+    expose:
+      - 3000
+    environment:
+      DATABASE_URL: postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    depends_on:
+      - postgres
+    networks:
+      - actnote_default
+
+  laravel_backend:
+    # container_name: laravel_backend
     build:
       context: .
       dockerfile: ./docker/laravel.Dockerfile
-    ports:
-      - ${LARAVEL_PORT}:8000
+    expose:
+      - 9000
     environment:
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=${MYSQL_DB_NAME}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - .:/var/www/html
-    networks:
-      - actnote-default
+      APP_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    # volumes:
+    #   - ./apps/backend-laravel:/var/www/html
     depends_on:
       - mysql
+    networks:
+      - actnote_default
+
+  postgres:
+    image: postgres:latest
+    # container_name: postgres
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - actnote_default
+
   mysql:
     image: mysql:9.3
-    container_name: mysql
+    # container_name: mysql
     ports:
       - ${MYSQL_PORT}:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DB_NAME}
-      - MYSQL_USER=${DB_USERNAME}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
-      - actnote-default
+      - actnote_default
 
 volumes:
-  mysql-data:
+  postgres_data:
+  mysql_data:
 
 networks:
-  actnote-default:
+  actnote_default:
     driver: bridge

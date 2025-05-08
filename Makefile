@@ -17,3 +17,6 @@ destroy:
 	docker compose down --remove-orphans --volumes --rmi all
 logs:
 	docker compose logs -f
+
+bash-laravel:
+	docker compose exec -it backend-laravel bash
