@@ -4,8 +4,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "pnpm run dev:laravel",
-    "dev:hono": "turbo run frontend#dev backend-hono#dev",
-    "dev:laravel": "turbo run frontend#dev backend-laravel#dev",
+    "dev:hono": "turbo run frontend#dev backend_hono#dev",
+    "dev:laravel": "turbo run frontend#dev backend_laravel#dev",
     "e2e": "turbo run e2e",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
