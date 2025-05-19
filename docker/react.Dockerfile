@@ -17,12 +17,12 @@ COPY apps/ ./apps/
 RUN pnpm install --frozen-lockfile
 
 # Turborepoを使用してフロントエンドアプリケーションをビルド
-# ※package.jsonのビルドスクリプトがapps/frontend/distに静的ファイルを生成することを要確認
-RUN pnpm turbo build --filter=frontend
+# ※package.jsonのビルドスクリプトがapps/web/distに静的ファイルを生成することを要確認
+RUN pnpm turbo build --filter=web
 
 # このコンテナ内でビルド出力が配置される場所を定義
 # このパスはNginxのDockerfileからコピー元として使用される
-ARG FRONTEND_BUILD_DIR=/app/apps/frontend/dist
-ENV FRONTEND_BUILD_DIR ${FRONTEND_BUILD_DIR}
+ARG WEB_BUILD_DIR=/app/apps/web/dist
+ENV WEB_BUILD_DIR ${WEB_BUILD_DIR}
 
 # ビルダーステージのためCMDは不要

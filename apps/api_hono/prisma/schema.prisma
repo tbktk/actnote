@@ -1,4 +1,4 @@
-// Prisma schema file for the Hono backend application.
+// Prisma schema file for the Hono api application.
 // This file defines the data model and database connection for the Prisma ORM.
 // For more information on how to use Prisma, visit https://pris.ly/d/prisma-docs
 

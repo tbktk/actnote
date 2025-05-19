@@ -19,4 +19,4 @@ logs:
 	docker compose logs -f
 
 bash-laravel:
-	docker compose exec -it backend_laravel bash
+	docker compose exec -it api_laravel bash

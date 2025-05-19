@@ -5,16 +5,16 @@ services:
       context: .
       dockerfile: ./docker/nginx.Dockerfile
       args:
-        FRONTEND_BUILDER_IMAGE: frontend_builder
+        WEB_BUILDER_IMAGE: web_builder
     ports:
       - ${NGINX_PORT}:80
     depends_on:
-      - backend_hono
-      - backend_laravel
+      - api_hono
+      - api_laravel
     networks:
       - actnote_default
 
-  backend_hono:
+  api_hono:
     build:
       context: .
       dockerfile: ./docker/hono.Dockerfile
@@ -27,7 +27,7 @@ services:
     networks:
       - actnote_default
 
-  backend_laravel:
+  api_laravel:
     build:
       context: .
       dockerfile: ./docker/laravel.Dockerfile

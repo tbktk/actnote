@@ -93,7 +93,7 @@ return [
     | Session Cache Store
     |--------------------------------------------------------------------------
     |
-    | When using one of the framework's cache driven session backends, you may
+    | When using one of the framework's cache driven session apis, you may
     | define the cache store which should be used to store the session data
     | between requests. This must match one of your defined cache stores.
     |

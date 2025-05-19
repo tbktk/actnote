@@ -27,7 +27,7 @@
       "persistent": true
     },
     "e2e": {
-      "dependsOn": ["frontend#build", "backend#build"],
+      "dependsOn": ["web#build", "api#build"],
       "cache": false
     }
   }

@@ -1,7 +1,7 @@
 #--------------------------------------------------------------------------------------------------
 # Stage 1: Frontend Builder - フロントエンドの静的アセットをビルド
 #--------------------------------------------------------------------------------------------------
-FROM node:23-slim AS frontend_builder
+FROM node:23-slim AS web_builder
 
 # pnpmを利用可能か確認し、必要であればインストール
 RUN corepack enable || true
@@ -19,13 +19,13 @@ COPY apps/ ./apps/
 RUN pnpm install --frozen-lockfile
 
 # Turborepoを使用してフロントエンドアプリケーションをビルド
-# ※package.jsonのビルドスクリプトがapps/frontend/distに静的ファイルを生成することを要確認
-RUN pnpm turbo build --filter=frontend
+# ※package.jsonのビルドスクリプトがapps/web/distに静的ファイルを生成することを要確認
+RUN pnpm turbo build --filter=web
 
 # このコンテナ内でビルド出力が配置される場所を定義
 # このパスはNginxのDockerfileからコピー元として使用される
-ARG FRONTEND_BUILD_DIR=/app/apps/frontend/dist
-ENV FRONTEND_BUILD_DIR ${FRONTEND_BUILD_DIR}
+ARG WEB_BUILD_DIR=/app/apps/web/dist
+ENV WEB_BUILD_DIR ${WEB_BUILD_DIR}
 
 #--------------------------------------------------------------------------------------------------
 # Stage 2: Nginx Server
@@ -37,7 +37,7 @@ RUN rm -rf /etc/nginx/conf.d/
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 # フロントエンドのビルダーステージでビルドされた静的ファイルをコピー
-COPY --from=frontend_builder ${FRONTEND_BUILD_DIR} /usr/share/nginx/html
+COPY --from=web_builder ${WEB_BUILD_DIR} /usr/share/nginx/html
 
 # Nginxのデフォルトポートを公開
 EXPOSE 80

@@ -18,7 +18,7 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
 
-  apps/backend_hono:
+  apps/api_hono:
     dependencies:
       '@hono/node-server':
         specifier: ^1.14.1
@@ -49,7 +49,7 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
 
-  apps/backend_laravel:
+  apps/api_laravel:
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.0.0
@@ -79,7 +79,7 @@ importers:
         specifier: ^22.15.3
         version: 22.15.3
 
-  apps/frontend:
+  apps/web:
     dependencies:
       '@inertiajs/progress':
         specifier: ^0.2.7
