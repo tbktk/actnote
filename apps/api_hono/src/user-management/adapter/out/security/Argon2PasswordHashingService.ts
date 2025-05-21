@@ -1,5 +1,5 @@
 import * as argon from 'argon2';
-import { PasswordHashingService } from './PasswordHashingService';
+import { IPasswordHashingService } from '../../../application/port/out/IPasswordHashingService';
 
 /**
  * Argon2のハッシュ化オプション
@@ -28,7 +28,7 @@ const ARGON2_HASHING_OPTIONS = {
  * Argon2は、特にGPUやASICによる攻撃に対して強力な防御を提供します。
  * このサービスは、ユーザーのパスワードを安全に保存するための重要なコンポーネントです。
  */
-export class Argon2PasswordHashingService implements PasswordHashingService {
+export class Argon2PasswordHashingService implements IPasswordHashingService {
   /**
    * パスワードをハッシュ化します。
    * @param password ハッシュ化する平文パスワード

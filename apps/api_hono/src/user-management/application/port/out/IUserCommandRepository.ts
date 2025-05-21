@@ -3,7 +3,7 @@ import { User } from '@/user-management/application/domain/model/User';
 /**
  * ユーザー コマンドリポジトリインターフェース
  */
-export interface UserCommandRepository {
+export interface IUserCommandRepository {
   /**
    * ユーザーを作成します。
    * @param user Userオブジェクト

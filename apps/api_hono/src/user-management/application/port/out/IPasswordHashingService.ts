@@ -1,7 +1,7 @@
 /**
  * パスワードハッシュ化サービスインターフェース
  */
-export interface PasswordHashingService {
+export interface IPasswordHashingService {
   /**
    * パスワードをハッシュ化します。
    * @param password ハッシュ化する平文パスワード
