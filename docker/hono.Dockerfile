@@ -19,10 +19,10 @@ COPY apps/ ./apps/
 RUN pnpm install --frozen-lockfile
 
 # Honoバックエンドをビルド
-RUN pnpm turbo build --filter=api_hono
+RUN pnpm turbo build --filter=api.hono
 
 # Honoバックエンドとその依存関係のみを含むようワークスペースをprune
-RUN pnpm turbo prune --scope=api_hono --docker
+RUN pnpm turbo prune --scope=api.hono --docker
 
 #--------------------------------------------------------------------------------------------------
 # Stage 2: Runner - Honoアプリとその依存関係のみを含む最小イメージを作成
@@ -32,7 +32,7 @@ FROM node:23-slim AS runner
 WORKDIR /app
 
 # ビルダーステージから剪定された依存関係とコードをコピー
-COPY --from=builder /app/out/full/apps/api_hono /app/apps/api_hono
+COPY --from=builder /app/out/full/apps/api.hono /app/apps/api.hono
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/out/json/ ./
 
@@ -40,4 +40,4 @@ COPY --from=builder /app/out/json/ ./
 EXPOSE 3000
 
 # Honoアプリケーションを実行するコマンド
-CMD ["node", "apps/api_hono/dist/index.js"]
+CMD ["node", "apps/api.hono/dist/index.js"]

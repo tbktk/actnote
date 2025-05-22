@@ -17,13 +17,13 @@ COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
 # Laravelアプリケーションのルートディレクトリを作業ディレクトリに設定
 # ビルドコンテキスト（モノレポのルート）から見た相対パス
-WORKDIR /app/apps/api_laravel
+WORKDIR /app/apps/api.laravel
 
 # キャッシュを効率的に利用するためにまずはcomposerファイルをコピー
-COPY apps/api_laravel/composer.json ./
+COPY apps/api.laravel/composer.json ./
 
 # Laravelアプリケーションの残りのコードをすべてコピー
-COPY apps/api_laravel/ ./
+COPY apps/api.laravel/ ./
 
 # Composer依存関係をインストール
 # ※本番環境向けに開発用依存関係を除外し、オートローダーを最適化
@@ -47,10 +47,10 @@ RUN apt update && apt install -y \
     && docker-php-ext-install pdo pdo_mysql mysqli zip \
     && apt clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app/apps/api_laravel
+WORKDIR /app/apps/api.laravel
 
 # ビルダーステージよりビルドされたアプリケーションコードと依存関係をコピー
-COPY --from=builder /app/apps/api_laravel/ ./
+COPY --from=builder /app/apps/api.laravel/ ./
 
 # 権限の設定
 # ※PHP-FPMを実行するユーザー（通常はwww-data）に書き込み権限を付与
