@@ -1,71 +1,94 @@
+// src/shared/utils/HttpErrorHandler.ts (または実際のパス)
+
 import {
   PasswordPolicyError,
   PasswordTooShortError,
+  // PasswordEmptyError,
   // PasswordMissingUppercaseError,
   // PasswordMissingLowercaseError,
   // PasswordMissingNumberError,
   // PasswordMissingSpecialCharacterError,
-  // PasswordEmptyError,
 } from '@/user-management/application/domain/error/PasswordPolicyErrors';
 
 import messagesJa from '@locales/ja/messages.json';
 
-interface ResponseMessage {
+interface ErrorDetail {
+  messageKey: string;
+  statusCode: number;
+  params: Record<string, string | number>;
+}
+
+export interface ResponseMessage {
   message: string;
   statusCode: number;
 }
 
 /**
- * エラーオブジェクトからユーザー向けのメッセージとHTTPステータスコードを取得します。
- * @param error 発生したエラーオブジェクト
- * @returns ユーザー向けメッセージとHTTPステータスコード
+ * 指定されたエラーに基づいて、ユーザーに表示するエラーメッセージを取得します。
+ * @param error エラーオブジェクト
+ * @returns ユーザーに表示するエラーメッセージとHTTPステータスコード
  */
 export const getErrorMessage = (error: Error): ResponseMessage => {
-  let messageKey: string | undefined;
-  let params: Record<string, string | number> = {};
-  let statusCode = 500; // デフォルトは Internal Server Error
+  const { messageKey, statusCode, params } = getErrorDetail(error);
 
-  // PasswordPolicyError のサブクラスに対する処理
+  const message = getMessage(messageKey, params);
+  if (message) {
+    return { message, statusCode };
+  }
+
+  console.warn(`Message template not found for key: ${messageKey}. Falling back to generic error.`);
+  return {
+    message: (messagesJa as any)?.Error?.Common?.InternalServerError || "エラーが発生しました。",
+    statusCode,
+  };
+};
+
+/**
+ * エラーの詳細を取得します。
+ * @param error エラーオブジェクト
+ * @returns エラーの詳細
+ */
+const getErrorDetail = (error: Error): ErrorDetail => {
   if (error instanceof PasswordPolicyError) {
-    messageKey = `PasswordPolicyErrors.${error.constructor.name}`;
-    statusCode = 400; // PasswordPolicyError は通常 Bad Request
-
-    if (error instanceof PasswordTooShortError) {
-      params = { minLength: error.minLength };
-    }
-  }
-  else {
-    // 予期せぬエラーや一般的なエラー
-    console.error("Unhandled error type or generic error:", error); // サーバーログには詳細を残す
-    messageKey = 'CommonErrors.InternalServerError'; // デフォルトの内部サーバーエラーメッセージ
-    statusCode = 500;
+    return {
+      messageKey: `Error.PasswordPolicy.${error.constructor.name}`,
+      statusCode: 400,
+      params: error instanceof PasswordTooShortError ? { minLength: error.minLength } : {},
+    };
   }
 
-  let userMessage = "エラーが発生しました。"; // 最終的なフォールバックメッセージ
-  if (messageKey) {
-    const path = messageKey.split('.');
-    let templateCatalog: any = messagesJa; // 型アサーションでアクセスしやすくする
+  console.error("Unhandled error type or generic error:", error);
+  return {
+    messageKey: 'Error.Common.InternalServerError',
+    statusCode: 500,
+    params: {},
+  };
+}
 
-    for (const p of path) {
-      if (templateCatalog && typeof templateCatalog === 'object' && p in templateCatalog) {
-        templateCatalog = templateCatalog[p];
-      } else {
-        templateCatalog = undefined; // キーが見つからない
-        break;
-      }
-    }
+/**
+ * 指定されたキーとパラメータに基づいて、情報メッセージを取得しフォーマットします。
+ * @param key メッセージカタログ内の情報メッセージを指すキー (例: "Info.Common.Saved")
+ * @param params メッセージテンプレートに埋め込むための動的な値 (例: { itemName: "ユーザー" })
+ * @returns フォーマットされた情報メッセージ文字列。キーが見つからない場合は、キー自体を返すか、
+ * またはデフォルトのフォールバックメッセージを返します。
+ */
+const getMessage = (key: string, params: Record<string, string | number>): string | undefined => {
+  const path = key.split('.');
+  let templateCatalog: any = messagesJa;
 
-    if (typeof templateCatalog === 'string') {
-      userMessage = templateCatalog.replace(/{(\w+)}/g, (_, key) =>
-        params[key] !== undefined ? String(params[key]) : `{${key}}`
-      );
-    } else if (messageKey !== 'CommonErrors.InternalServerError') {
-      // メッセージキーに対応するテンプレートが見つからない場合 (InternalServerError以外)
-      console.warn(`Message template not found for key: ${messageKey}. Falling back to generic error.`);
-      // CommonErrors.InternalServerErrorのメッセージをフォールバックとして使用
-      userMessage = messagesJa.Error.Common.InternalServerError;
+  for (const p of path) {
+    if (templateCatalog && typeof templateCatalog === 'object' && p in templateCatalog) {
+      templateCatalog = templateCatalog[p];
+    } else {
+      templateCatalog = undefined;
+      break;
     }
   }
 
-  return { message: userMessage, statusCode };
+  if (typeof templateCatalog === 'string') {
+    return templateCatalog.replace(/{(\w+)}/g, (_, key) =>
+      params[key] !== undefined ? String(params[key]) : `{${key}}`
+    );
+  }
+  return undefined;
 }

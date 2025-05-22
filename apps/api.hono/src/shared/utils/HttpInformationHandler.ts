@@ -12,7 +12,7 @@ export function getInformationMessage(
   params?: Record<string, string | number>
 ): string {
   const path = key.split('.');
-  let templateCatalog: any = messagesJa; // 型アサーションでアクセスしやすくする
+  let templateCatalog: any = messagesJa;
 
   for (const p of path) {
     if (templateCatalog && typeof templateCatalog === 'object' && p in templateCatalog) {
@@ -30,9 +30,9 @@ export function getInformationMessage(
       );
     }
     return templateCatalog; // パラメータなしの場合はそのまま返す
-  } else {
-    // キーに対応するメッセージテンプレートが見つからない場合
-    console.warn(`Information message template not found for key: ${key}. Returning key as message.`);
-    return key; // キーそのものを返すか、あるいは固定のフォールバックメッセージを返す
   }
+
+  // キーに対応するメッセージテンプレートが見つからない場合
+  console.warn(`Information message template not found for key: ${key}. Returning key as message.`);
+  return key; // キーそのものを返すか、あるいは固定のフォールバックメッセージを返す
 }
