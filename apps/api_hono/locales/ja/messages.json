@@ -1,0 +1,25 @@
+{
+  "Info": {
+    "Common": {
+      "Saved": "保存しました。",
+      "Deleted": "削除しました。",
+      "Updated": "更新しました。",
+      "Created": "作成しました。"
+    }
+  },
+  "Error": {
+    "Common": {
+      "InternalServerError": "サーバー内部でエラーが発生しました。しばらくしてから再度お試しください。",
+      "NotFoundError": "リソースが見つかりませんでした。",
+      "BadRequestError": "リクエストが不正です。"
+    },
+    "PasswordPolicy": {
+      "PasswordEmptyError": "パスワードを入力してください。",
+      "PasswordTooShortError": "パスワードは最低 {minLength} 文字で入力してください。",
+      "PasswordMissingUppercaseError": "パスワードには大文字のアルファベットを1文字以上含めてください。",
+      "PasswordMissingLowercaseError": "パスワードには小文字のアルファベットを1文字以上含めてください。",
+      "PasswordMissingNumberError": "パスワードには数字を1文字以上含めてください。",
+      "PasswordMissingSpecialCharacterError": "パスワードには記号を1文字以上含めてください。"
+    }
+  }
+}

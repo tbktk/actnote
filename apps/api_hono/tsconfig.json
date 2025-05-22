@@ -11,12 +11,14 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@locales/*": ["./locales/*"],
     },
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "lib": ["ESNext", "DOM"],
+    "resolveJsonModule": true,
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "locales/**/*"],
   "exclude": ["node_modules"]
 }
