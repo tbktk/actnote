@@ -4,6 +4,9 @@ import { Email } from './Email';
 import { Password } from './Password';
 import { UserName } from './UserName';
 
+/**
+ * Userエンティティ。
+ */
 export class User {
   private readonly _userId: UserId;
   private _email: Email;
@@ -89,5 +92,6 @@ export class User {
   // --- ゲッター ---
   get userId(): UserId { return this._userId; }
   get email(): Email { return this._email; }
+  get password(): Password { return this._password; }
   get userName(): UserName { return this._userName; }
 }
