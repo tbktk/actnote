@@ -31,7 +31,7 @@ app.use('*', async (c, next) => {
   const start = Date.now();
   await next();
   const ms = Date.now() - start;
-  
+
   console.log(`📢 ${c.req.method} ${c.req.url} - ${c.res.status} (${ms}ms)`);
 });
 
@@ -83,7 +83,7 @@ app.route('/', userApp);
 // 開発環境用のルート追加
 if (process.env.NODE_ENV === 'development') {
   UserRoutes.addDevRoutes(app, container);
-  
+
   // 開発環境用の追加エンドポイント
   app.get('/dev/container-status', (c) => {
     try {
@@ -120,7 +120,7 @@ app.notFound((c) => {
 // エラーハンドラー
 app.onError((err, c) => {
   console.error('Global error handler:', err);
-  
+
   return c.json({
     error: 'Internal Server Error',
     message: err.message,
